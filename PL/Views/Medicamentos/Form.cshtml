@@ -1,0 +1,115 @@
+﻿@model ML.Medicamentos
+@{
+    ViewData["Title"] = "Form";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src=" https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href=" https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<div class="container">
+    <h2 class="text-center">Formulario de Medicamentos</h2>
+    <h5>Ingrese la información del nuevo Medicamento</h5>
+    <hr />
+
+    @using (Html.BeginForm("Form", "Medicamentos", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.HiddenFor(model => model.IdMedicamentos)
+        <div class="row">
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.SKU)
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">
+                        <i class="bi bi-clipboard2-pulse-fill"></i>
+                    </span>
+                    @Html.TextBoxFor(model => model.SKU, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.Nombre)
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1"><i class="bi bi-clipboard2-pulse-fill"></i></span>
+                    @Html.TextBoxFor(model => model.Nombre, new { @class = "form-control" })
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                @Html.LabelFor(model => model.Precio)
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1"><i class="bi bi-clipboard2-pulse-fill"></i></span>
+                    @Html.TextBoxFor(model => model.Precio, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="col-md-3">
+                @if (Model.Imagen != null)
+                {
+                    <img src="data:image;base64,@Model.Imagen" alt="Imagen" width="200" height="200" />
+                    <input id="Imagen" name="Imagen" type="file" class="form-control" onchange="ValidarImagen(), visualizarImagen(this)" />
+                }
+                else
+                {
+                    <img id="img" src="https://www.computerhope.com/jargon/g/guest-user.png" width="200" height="200" />
+                    <input id="Imagen" name="Imagen" type="file" class="form-control" onchange="ValidarImagen(), visualizarImagen(this)" />
+                }
+            </div>
+        </div>
+        <div class="text-center">
+            <button id="btnGuardar" class="btn btn-success" type="submit"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+            <a id="btnCancelar" onmouseover="CambiarColor()" class="btn btn-danger" href="@Url.Action("Index", "Medicamentos")"><i class="fa-solid fa-right-from-bracket"></i> Volver</a>
+        </div>
+
+    }
+</div>
+@section Scripts{
+<script type="text/javascript">
+
+    function lettersOnly(e, lbl) {
+        var charCode = e.keyCode;
+
+        if ((charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || charCode == 8) {
+            $('#' + lbl).text("")
+            return true;
+        }
+        else {
+            $('#' + lbl).text("Solo se aceptan letras")
+            $('#' + lbl).css('color', 'red');
+            return false;
+        }
+    }
+
+    $("#btnGuardar").mouseenter(function () {
+        $("#btnGuardar").addClass("fa-beat").mouseout(function () {
+            $("#btnGuardar").removeClass("fa-beat")
+        })
+    })
+    function CambiarColor() {
+        $("#btnCancelar").toggleClass("btn-danger btn-secondary")
+    }
+
+    function ValidarImagen() {
+        var extensionesPermitidas = ['jpeg', 'jpg', 'png'];
+        var extensionArchivo = document.getElementById('Imagen').value.split('.').pop().toLowerCase();
+        var isValidFile = false; //saber si es valida o no es valida
+        for (var index in extensionesPermitidas) {
+            if (extensionArchivo === extensionesPermitidas[index]) {
+                isValidFile = true;
+                break;
+            }
+        }
+        if (!isValidFile) {
+            alert('Las extensiones permitidas son : *.' + extensionesPermitidas.join(', *.'));
+            $("#Imagen").val("")
+        }
+        return isValidFile;
+
+    }
+    function visualizarImagen(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('#img').attr('src', e.target.result);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+}

@@ -1,0 +1,55 @@
+﻿@model ML.Usuarios
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href=" https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<script src=" https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+<div class="text-center">
+    <h2>Usuario</h2>
+    <h5>Lista de Usuarios</h5>
+</div>
+<hr />
+
+<a href="@Url.Action("Form","Usuarios")" class="btn btn-success">Agregar </a>
+@if (Model.usuarios.Count > 0)
+{
+    <table class="table">
+        <thead class="table-primary">
+            <!-- On rows -->
+            <tr class="bg-warning">
+                <th>Editar</th>
+                <th>IdUsuarios</th>
+                <th>Nombre</th>
+                <th>Apellido Paterno</th>
+                <th>Apellido Materno</th>
+                <th>Email</th>
+                <th>Contraseña</th>
+                <th>Eliminar</th>
+                <!-- On cells (`td` or `th`) -->
+            </tr>
+        </thead>
+        <tbody class="table-active table-dark">
+            @foreach (ML.Usuarios usuarios in Model.usuarios)
+            {
+                <tr>
+                    <td><a class="btn btn-warning" href="@Url.Action("Form", "Usuarios", new { IdUsuarios = usuarios.IdUsuarios })"><i class="fa-solid fa-pencil fa-bounce" style="color: #332774;"></i></a></td>
+                    <td>@usuarios.IdUsuarios</td>
+                    <td>@usuarios.Nombre</td>
+                    <td>@usuarios.ApellidoPaterno</td>
+                    <td>@usuarios.ApellidoMaterno</td>
+                    <td>@usuarios.Email</td>
+                    <td>@usuarios.Contraseña</td>
+
+                    <td><a class="btn btn-danger" href="@Url.Action("Delete", "Usuarios", new { IdUsuarios = usuarios.IdUsuarios })" onclick="return confirm('Estas seguro de que quieres eliminar este registro');"> <i class="fa-solid fa-trash fa-beat" style="color: black;"></i></a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-warning" role="alert">
+        No existen registros en la tabla :(
+    </div>
+}
