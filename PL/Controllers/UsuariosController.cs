@@ -137,7 +137,7 @@ namespace PL.Controllers
             {
                 using (var cliente = new HttpClient())
                 {
-                    int IdUsuarios = usuarios.IdUsuarios.Value;
+                    int IdUsuarios = usuarios.IdUsuarios;
 
                     cliente.BaseAddress = new Uri("http://localhost:5143/api/");
 
@@ -190,8 +190,8 @@ namespace PL.Controllers
                 string hashedPassword = EncryptPassword(Contraseña);
                 if (hashedPassword == usuario.Contraseña)
                 {
-                    usuario.Rol.Tipo = HttpContext.Session.GetString("Role");
-                    usuario.IdUsuarios = HttpContext.Session.GetInt32("Usuarios");
+                    HttpContext.Session.SetInt32("Usuarios", usuario.IdUsuarios);
+                    HttpContext.Session.SetString("Role", usuario.Rol.Tipo);
                     return RedirectToAction("Index", "Home");
                 }
                 else

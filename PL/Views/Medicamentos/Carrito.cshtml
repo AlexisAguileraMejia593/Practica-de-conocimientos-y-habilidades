@@ -1,0 +1,226 @@
+﻿
+@{
+    ViewData["Title"] = "Carrito";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+﻿
+@model ML.DetallesPedido
+<div class="container">
+    <div class="text-center">
+        <h1>Tu Carrito</h1>
+    </div>
+    <hr />
+
+    @if (Model.DetallesPedidos == null || Model.DetallesPedidos.Count == 0)
+    {
+        <div class="alert alert-warning" role="alert">
+            Aun no tienes productos agregados ):
+        </div>
+    }
+    else
+    {
+        <div class="btn-group d-flex" role="group" aria-label="Button group with nested dropdown">
+            <button type="button" onclick="AbrirModal()" class="btn btn-dark"><i class="fa-solid fa-money-bill"></i> Comprar</button>
+            <button type="button" class="btn btn-dark"><i class="fa-solid fa-broom"></i> Limpiar</button>
+            <button type="button" class="btn btn-outline-danger"><i class="fa-solid fa-door-open"></i> Regresar</button>
+        </div>
+        <br />
+        <table class="table table-dark table-hover table-bordered table-responsive">
+            <thead>
+                <tr class="table-secondary">
+                    <td class="text-center">Nombre</td>
+                    <td class="text-center">Precio</td>
+                    <td class="text-center">Imagen</td>
+                    <td class="text-center">Agregar</td>
+                    <td class="text-center">cantidad</td>
+                    <td class="text-center">Quitar</td>
+                    <td class="text-center">Eliminar</td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (ML.DetallesPedido detallesPedido in Model.DetallesPedidos)
+                {
+                    <tr>
+                        <td>@detallesPedido.Medicamentos.Nombre</td>
+                        <td>$ @detallesPedido.Medicamentos.Nombre</td>
+                        @if (detallesPedido.Medicamentos.Imagen != null)
+                        {
+                            <td class="text-center"><img id="Img" src="data:image/*;base64,@detallesPedido.Medicamentos.Imagen" style="width:50px ; height:50px" /></td>
+                        }
+                        else
+                        {
+                            <td class="text-center"><img id="Img" src="https://st.depositphotos.com/2934765/53192/v/450/depositphotos_531920820-stock-illustration-photo-available-vector-icon-default.jpg" style="width:50px ; height:50px" /></td>
+                        }
+
+                        <td><button class="btn btn-success"><i class="fa-solid fa-square-plus"></i></button> </td>
+                        <td>@detallesPedido.Cantidad </td>
+                        <td><button class="btn btn-warning"><i class="fa-solid fa-square-minus"></i></button> </td>
+                        <td><button class="btn btn-danger"><i class="fa-solid fa-trash-can"></i></button> </td>
+                    </tr>
+
+                }
+            </tbody>
+        </table>
+        <label>Total: $ @Model.Total</label>
+        <input type="text" id="txtLatitud" hidden />
+        <input type="text" id="txtLongitud" hidden />
+    }
+</div>
+<div class="modal fade " id="Modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        @using (Html.BeginForm("Index", "Dulceria", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            <div class="modal-content">
+                <div class="modal-header alert-secondary">
+                    <h5 class="modal-title" id="exampleModalLabel">Termina tu compra</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row text-center">
+                        <div class="col-md-6">
+                            @Html.Label("Numero de Tarjeta")
+                            <div class="input-group ">
+                                <span class="input-group-text" id="addonStock"><i class="fa-brands fa-cc-visa"></i></span>
+                                <input type="text" class="form-control" />
+                            </div>
+                            @Html.Label("", null, new { @id = "lblStock" })
+                        </div>
+                        <div class="col-md-3">
+                            @Html.Label("CVV")
+                            <div class="input-group ">
+                                <span class="input-group-text" id="addonStock">CVV</span>
+                                <input type="text" class="form-control" />
+                            </div>
+                            @Html.Label("", null, new { @id = "lblStock" })
+                        </div>
+                        <div class="col-md-3">
+                            @Html.Label("Vencimiento")
+                            <div class="input-group ">
+                                <span class="input-group-text" id="addonStock"><i class="fa-regular fa-calendar"></i></span>
+                                <input type="month" class="form-control" />
+                            </div>
+                            @Html.Label("", null, new { @id = "lblStock" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label>Direccion</label>
+                            <input class="form-control col-md-12" id="txtDireccion" type="text" disabled />
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <h2 class="text-center">Ingresa Tu Direccion</h2>
+                        <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+                        <div id="map"></div>
+
+                        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCSKBDdPPlfca_zTwyxKiicRQn1qfgRjLw&callback=initMap&libraries=&v=weekly&sensor=false" defer></script>
+
+                    </div>
+
+                    <br />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                    <a onclick="ModalCompra()" id="btnGuardar" class="btn btn-dark"><i class="fa-solid fa-truck"></i> Pedir</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<div class="modal fade " id="ModalCompra" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header alert-success">
+                <h5 class="modal-title" id="exampleModalLabel">Completado! <i class="fa-solid fa-check"></i></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row text-center">
+                    <h2 class="text-center">Tu pedido esta en proceso!</h2>
+                    <img src="https://cdn.pixabay.com/animation/2022/11/10/13/26/13-26-03-556_512.gif" width="50" height="520" />
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
+                <a href="@Url.Action("GenerarPDF")" id="btnGuardar" class="btn btn-dark"><i class="fa-solid fa-file-pdf"></i> Resumen</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+<style>
+    #map {
+        height: 300px;
+        width: 65%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+@section Scripts{
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type="text/javascript">
+        function AbrirModal() {
+            $('#Modal').modal('show');
+        }
+        function ModalCompra() {
+            $('#Modal').modal('hide');
+            $('#ModalCompra').modal('show');
+        }
+        function initMap() {
+
+
+            myLatlng = { lat: 19.5530408, lng: -99.2748958 };
+
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 14,
+                center: myLatlng,
+            });
+            // Create the initial InfoWindow.
+            let infoWindow = new google.maps.InfoWindow({
+                content: "Presiona la locación",
+                position: myLatlng,
+            });
+
+            infoWindow.open(map);
+            // Configure the click listener.
+
+            //obtener direccion
+            google.maps.event.addListener(map, 'click', function (event) {
+                var geocoder = new google.maps.Geocoder();
+                geocoder.geocode({
+                    'latLng': event.latLng
+                }, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        if (results[0]) {
+                            $("#txtDireccion").val(results[0].formatted_address);
+                        }
+                    }
+                });
+            });
+
+
+            //obtener cordenadas
+            map.addListener("click", (mapsMouseEvent) => {
+                // Close the current InfoWindow.
+                infoWindow.close();
+                // Create a new InfoWindow.
+                infoWindow = new google.maps.InfoWindow({
+                    position: mapsMouseEvent.latLng,
+                });
+                infoWindow.setContent(
+                    JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2)
+                );
+
+                infoWindow.open(map);
+                var Latitud = mapsMouseEvent.latLng.lat();
+                var Longitud = mapsMouseEvent.latLng.lng();
+                $("#txtLatitud").val(Latitud);
+                $("#txtLongitud").val(Longitud);
+            });
+        }
+
+        window.initMap = initMap;</script>
+}

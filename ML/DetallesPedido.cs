@@ -13,5 +13,6 @@ namespace ML
         public ML.Medicamentos? Medicamentos { get; set;}
         public int Cantidad { get; set;}
         public Decimal? Total { get; set;}
+        public List<ML.DetallesPedido>? DetallesPedidos { get; set;}
     }
 }

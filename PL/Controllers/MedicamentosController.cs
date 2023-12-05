@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace PL.Controllers
 {
@@ -43,7 +44,7 @@ namespace PL.Controllers
             }
             return View(medicamentos);
         }
-            [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> FormAsync(ML.Medicamentos medicamentos, IFormFile Imagen)
         {
             if (ModelState.IsValid)
@@ -103,6 +104,81 @@ namespace PL.Controllers
                 ViewBag.Mensaje = "No se Elimino correctamente el Medicamento";
             }
             return PartialView("Modal");
+        }
+        public IActionResult AddCarrito(int IdMedicamento)
+        {
+            List<ML.DetallesPedido> listaDetallesPedidos;
+            var result = BL.Medicamentos.GetById(IdMedicamento);
+            if (HttpContext.Session.GetString("Carrito") == null)
+            {
+                listaDetallesPedidos = new List<ML.DetallesPedido>();
+                if (result != null)
+                {
+                    ML.DetallesPedido detallesPedido = new ML.DetallesPedido();
+                    detallesPedido.Medicamentos = new ML.Medicamentos();
+                    detallesPedido.Medicamentos = result;
+                    detallesPedido.Cantidad = 1;
+                    listaDetallesPedidos.Add(detallesPedido);
+                }
+            }
+            else
+            {
+                // Deserializar la lista del carrito de la sesión
+                listaDetallesPedidos = JsonConvert.DeserializeObject<List<ML.DetallesPedido>>(HttpContext.Session.GetString("Carrito"));
+                bool existe = false;
+                foreach (var detallesPedido in listaDetallesPedidos)
+                {
+                    if (detallesPedido.Medicamentos.IdMedicamentos == result.IdMedicamentos)
+                    {
+                        detallesPedido.Cantidad += 1;
+                        existe = true;
+                        break;
+                    }
+                }
+                if (!existe)
+                {
+                    ML.DetallesPedido detallesPedido = new ML.DetallesPedido();
+                    detallesPedido.Medicamentos = new ML.Medicamentos();
+                    detallesPedido.Medicamentos = result;
+                    detallesPedido.Cantidad = 1;
+                    listaDetallesPedidos.Add(detallesPedido);
+                }
+            }
+            // Serializar la lista del carrito a la sesión
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            var json = JsonConvert.SerializeObject(listaDetallesPedidos, settings);
+            HttpContext.Session.SetString("Carrito", json);
+            return RedirectToAction("Index");
+        }
+        public ML.DetallesPedido GetCarrito(ML.DetallesPedido detallesPedido)
+        {
+            var ventaSession = Newtonsoft.Json.JsonConvert.DeserializeObject<List<object>>(HttpContext.Session.GetString("Carrito"));
+
+            foreach (var obj in ventaSession)
+            {
+                string json = HttpContext.Session.GetString("Carrito");
+                List<ML.DetallesPedido> detallesPedidos = JsonConvert.DeserializeObject<List<ML.DetallesPedido>>(json);
+                detallesPedido.DetallesPedidos.Add(detallesPedido);
+            }
+            return detallesPedido;
+        }
+        public IActionResult Carrito()
+        {
+            ML.DetallesPedido detallesPedido = new ML.DetallesPedido();
+            detallesPedido.DetallesPedidos = new List<ML.DetallesPedido>();
+            if (HttpContext.Session.GetString("Carrito") == null)
+            {
+                return View(detallesPedido);
+            }
+            else
+            {
+                GetCarrito(detallesPedido);
+                return View(detallesPedido);
+            }
+
         }
         public string ConvertirABase64(IFormFile Foto)
         {

@@ -5,6 +5,8 @@ namespace PL
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddMvc();
+            builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(60);
@@ -16,6 +18,7 @@ namespace PL
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
+            app.UseStaticFiles();
             app.UseSession();
 
             // Configure the HTTP request pipeline.
