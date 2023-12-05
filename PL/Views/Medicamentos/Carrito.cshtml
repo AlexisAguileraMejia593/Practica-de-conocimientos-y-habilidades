@@ -4,14 +4,14 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 ﻿
-@model ML.DetallesPedido
+@model ML.Carrito
 <div class="container">
     <div class="text-center">
         <h1>Tu Carrito</h1>
     </div>
     <hr />
 
-    @if (Model.DetallesPedidos == null || Model.DetallesPedidos.Count == 0)
+    @if (Model.Carritos == null || Model.Carritos.Count == 0)
     {
         <div class="alert alert-warning" role="alert">
             Aun no tienes productos agregados ):
@@ -38,14 +38,14 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (ML.DetallesPedido detallesPedido in Model.DetallesPedidos)
+                @foreach (ML.Medicamentos medicamentos in Model.Carritos)
                 {
                     <tr>
-                        <td>@detallesPedido.Medicamentos.Nombre</td>
-                        <td>$ @detallesPedido.Medicamentos.Nombre</td>
-                        @if (detallesPedido.Medicamentos.Imagen != null)
+                        <td>@medicamentos.Nombre</td>
+                        <td>$ @medicamentos.Precio</td>
+                        @if (medicamentos.Imagen != null)
                         {
-                            <td class="text-center"><img id="Img" src="data:image/*;base64,@detallesPedido.Medicamentos.Imagen" style="width:50px ; height:50px" /></td>
+                            <td class="text-center"><img id="Img" src="data:image/*;base64,@medicamentos.Imagen" style="width:50px ; height:50px" /></td>
                         }
                         else
                         {
@@ -53,7 +53,7 @@
                         }
 
                         <td><button class="btn btn-success"><i class="fa-solid fa-square-plus"></i></button> </td>
-                        <td>@detallesPedido.Cantidad </td>
+                        <td>@medicamentos.Cantidad </td>
                         <td><button class="btn btn-warning"><i class="fa-solid fa-square-minus"></i></button> </td>
                         <td><button class="btn btn-danger"><i class="fa-solid fa-trash-can"></i></button> </td>
                     </tr>

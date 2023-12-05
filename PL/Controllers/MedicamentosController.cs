@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
+using ML;
 using Newtonsoft.Json;
 
 namespace PL.Controllers
@@ -105,78 +107,81 @@ namespace PL.Controllers
             }
             return PartialView("Modal");
         }
-        public IActionResult AddCarrito(int IdMedicamento)
+        public IActionResult AddCarrito(int IdMedicamentos)
         {
-            List<ML.DetallesPedido> listaDetallesPedidos;
-            var result = BL.Medicamentos.GetById(IdMedicamento);
+            bool existe = false;
+            ML.Carrito carrito = new ML.Carrito();
+            carrito.Carritos = new List<object>();
+            var result = BL.Medicamentos.GetById(IdMedicamentos);
             if (HttpContext.Session.GetString("Carrito") == null)
             {
-                listaDetallesPedidos = new List<ML.DetallesPedido>();
+
                 if (result != null)
                 {
-                    ML.DetallesPedido detallesPedido = new ML.DetallesPedido();
-                    detallesPedido.Medicamentos = new ML.Medicamentos();
-                    detallesPedido.Medicamentos = result;
-                    detallesPedido.Cantidad = 1;
-                    listaDetallesPedidos.Add(detallesPedido);
+                    ML.Medicamentos medicamentos = result;
+                    medicamentos.Cantidad = 1;
+                    carrito.Carritos.Add(medicamentos);
+                    //serializar carrito
+                    HttpContext.Session.SetString("Carrito", Newtonsoft.Json.JsonConvert.SerializeObject(carrito.Carritos));
                 }
+
             }
             else
             {
-                // Deserializar la lista del carrito de la sesión
-                listaDetallesPedidos = JsonConvert.DeserializeObject<List<ML.DetallesPedido>>(HttpContext.Session.GetString("Carrito"));
-                bool existe = false;
-                foreach (var detallesPedido in listaDetallesPedidos)
+
+                ML.Medicamentos medicamentos = result;
+                GetCarrito(carrito); //ya recupere el carrito
+                foreach (ML.Medicamentos medicamentos1 in carrito.Carritos)
                 {
-                    if (detallesPedido.Medicamentos.IdMedicamentos == result.IdMedicamentos)
+                    if (medicamentos.IdMedicamentos == medicamentos1.IdMedicamentos)
                     {
-                        detallesPedido.Cantidad += 1;
+                        medicamentos.Cantidad += 1;
                         existe = true;
                         break;
                     }
+                    else
+                    {
+                        existe = false;
+                    }
                 }
-                if (!existe)
+                if (existe == true)
                 {
-                    ML.DetallesPedido detallesPedido = new ML.DetallesPedido();
-                    detallesPedido.Medicamentos = new ML.Medicamentos();
-                    detallesPedido.Medicamentos = result;
-                    detallesPedido.Cantidad = 1;
-                    listaDetallesPedidos.Add(detallesPedido);
+                    HttpContext.Session.SetString("Carrito", Newtonsoft.Json.JsonConvert.SerializeObject(carrito.Carritos));
                 }
+                else
+                {
+                    medicamentos.Cantidad = 1;
+                    carrito.Carritos.Add(medicamentos);
+                    HttpContext.Session.SetString("Carrito", Newtonsoft.Json.JsonConvert.SerializeObject(carrito.Carritos));
+                }
+
             }
-            // Serializar la lista del carrito a la sesión
-            var settings = new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            };
-            var json = JsonConvert.SerializeObject(listaDetallesPedidos, settings);
-            HttpContext.Session.SetString("Carrito", json);
+
             return RedirectToAction("Index");
         }
-        public ML.DetallesPedido GetCarrito(ML.DetallesPedido detallesPedido)
+        public ML.Carrito GetCarrito(ML.Carrito carrito)
         {
             var ventaSession = Newtonsoft.Json.JsonConvert.DeserializeObject<List<object>>(HttpContext.Session.GetString("Carrito"));
 
             foreach (var obj in ventaSession)
             {
-                string json = HttpContext.Session.GetString("Carrito");
-                List<ML.DetallesPedido> detallesPedidos = JsonConvert.DeserializeObject<List<ML.DetallesPedido>>(json);
-                detallesPedido.DetallesPedidos.Add(detallesPedido);
+                ML.Medicamentos objMateria = Newtonsoft.Json.JsonConvert.DeserializeObject<ML.Medicamentos>(obj.ToString());
+                carrito.Carritos.Add(objMateria);
             }
-            return detallesPedido;
+            return carrito;
         }
         public IActionResult Carrito()
         {
-            ML.DetallesPedido detallesPedido = new ML.DetallesPedido();
-            detallesPedido.DetallesPedidos = new List<ML.DetallesPedido>();
+            ML.Carrito carrito = new ML.Carrito();
+            carrito.Carritos = new List<object>();
             if (HttpContext.Session.GetString("Carrito") == null)
             {
-                return View(detallesPedido);
+                return View(carrito);
             }
             else
             {
-                GetCarrito(detallesPedido);
-                return View(detallesPedido);
+                GetCarrito(carrito);
+                return View(carrito);
             }
 
         }
