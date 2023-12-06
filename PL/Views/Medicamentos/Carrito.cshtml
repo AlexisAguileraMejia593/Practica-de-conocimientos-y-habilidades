@@ -42,7 +42,15 @@
                 {
                     <tr>
                         <td>@medicamentos.Nombre</td>
-                        <td>$ @medicamentos.Precio</td>
+                        @if(medicamentos.Cantidad > 1)
+                        {
+                            <td>$ @medicamentos.PrecioTotal</td>
+                        }
+                        else
+                        {
+                            <td>$ @medicamentos.Precio</td>
+                        }
+                        
                         @if (medicamentos.Imagen != null)
                         {
                             <td class="text-center"><img id="Img" src="data:image/*;base64,@medicamentos.Imagen" style="width:50px ; height:50px" /></td>
@@ -52,9 +60,9 @@
                             <td class="text-center"><img id="Img" src="https://st.depositphotos.com/2934765/53192/v/450/depositphotos_531920820-stock-illustration-photo-available-vector-icon-default.jpg" style="width:50px ; height:50px" /></td>
                         }
 
-                        <td><button class="btn btn-success"><i class="fa-solid fa-square-plus"></i></button> </td>
+                        <td><button class="btn btn-success" data-id="@medicamentos.IdMedicamentos"><i class="fa-solid fa-square-plus"></i></button> </td>
                         <td>@medicamentos.Cantidad </td>
-                        <td><button class="btn btn-warning"><i class="fa-solid fa-square-minus"></i></button> </td>
+                        <td><button class="btn btn-warning" data-id="@medicamentos.IdMedicamentos"><i class="fa-solid fa-square-minus"></i></button> </td>
                         <td><button class="btn btn-danger"><i class="fa-solid fa-trash-can"></i></button> </td>
                     </tr>
 
@@ -146,6 +154,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Salir</button>
                 <a href="@Url.Action("GenerarPDF")" id="btnGuardar" class="btn btn-dark"><i class="fa-solid fa-file-pdf"></i> Resumen</a>
+                <button id="btnResumen">GuardarPedido</button>
             </div>
         </div>
     </div>
@@ -160,6 +169,42 @@
     }
 </style>
 @section Scripts{
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".btn-success").click(function () {
+                var id = $(this).data("id"); 
+                $.ajax({
+                    url: '/Medicamentos/Agregar/' + id, 
+                    type: 'POST',
+                    success: function (result) {
+                        location.reload();
+                    }
+                });
+            });
+
+            $(".btn-warning").click(function () {
+                var id = $(this).data("id"); 
+                $.ajax({
+                    url: '/Medicamentos/Quitar/' + id, 
+                    type: 'POST',
+                    success: function (result) {
+                        location.reload(); 
+                    }
+                });
+            });
+        });
+        $("#btnResumen").click(function () {
+            var UsuariosID = @Context.Session.GetInt32("Usuarios");
+            $.ajax({
+                url: '/Medicamentos/GuardarPedido/' + UsuariosID,
+                type: 'POST',
+                success: function (result) {
+                    alert("Pedido guardado con éxito!");
+                }
+            });
+        });
+    </script>
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script type="text/javascript">
         function AbrirModal() {

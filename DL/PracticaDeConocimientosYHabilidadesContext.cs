@@ -15,7 +15,11 @@ public partial class PracticaDeConocimientosYHabilidadesContext : DbContext
     {
     }
 
+    public virtual DbSet<DetallesPedido> DetallesPedidos { get; set; }
+
     public virtual DbSet<Medicamento> Medicamentos { get; set; }
+
+    public virtual DbSet<Pedido> Pedidos { get; set; }
 
     public virtual DbSet<Rol> Rols { get; set; }
 
@@ -27,6 +31,26 @@ public partial class PracticaDeConocimientosYHabilidadesContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<DetallesPedido>(entity =>
+        {
+            entity.HasKey(e => e.DetallesPedidoId).HasName("PK__Detalles__CD309D2DD481B4A2");
+
+            entity.ToTable("DetallesPedido");
+
+            entity.Property(e => e.DetallesPedidoId).HasColumnName("DetallesPedidoID");
+            entity.Property(e => e.MedicamentosId).HasColumnName("MedicamentosID");
+            entity.Property(e => e.PedidosId).HasColumnName("PedidosID");
+            entity.Property(e => e.Total).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.Medicamentos).WithMany(p => p.DetallesPedidos)
+                .HasForeignKey(d => d.MedicamentosId)
+                .HasConstraintName("FK__DetallesP__Medic__2A4B4B5E");
+
+            entity.HasOne(d => d.Pedidos).WithMany(p => p.DetallesPedidos)
+                .HasForeignKey(d => d.PedidosId)
+                .HasConstraintName("FK__DetallesP__Pedid__29572725");
+        });
+
         modelBuilder.Entity<Medicamento>(entity =>
         {
             entity.HasKey(e => e.MedicamentosId).HasName("PK__Medicame__07B203FCD63316A6");
@@ -40,6 +64,19 @@ public partial class PracticaDeConocimientosYHabilidadesContext : DbContext
             entity.Property(e => e.Sku)
                 .HasMaxLength(50)
                 .HasColumnName("SKU");
+        });
+
+        modelBuilder.Entity<Pedido>(entity =>
+        {
+            entity.HasKey(e => e.PedidosId).HasName("PK__Pedidos__6256AA0BC8822607");
+
+            entity.Property(e => e.PedidosId).HasColumnName("PedidosID");
+            entity.Property(e => e.Fecha).HasColumnType("date");
+            entity.Property(e => e.UsuariosId).HasColumnName("UsuariosID");
+
+            entity.HasOne(d => d.Usuarios).WithMany(p => p.Pedidos)
+                .HasForeignKey(d => d.UsuariosId)
+                .HasConstraintName("FK__Pedidos__Usuario__267ABA7A");
         });
 
         modelBuilder.Entity<Rol>(entity =>

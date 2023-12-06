@@ -14,4 +14,6 @@ public partial class Medicamento
     public decimal? Precio { get; set; }
 
     public string? Imagen { get; set; }
+
+    public virtual ICollection<DetallesPedido> DetallesPedidos { get; set; } = new List<DetallesPedido>();
 }
